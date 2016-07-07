@@ -12,7 +12,11 @@ enum BrickTypes {
 
 class Brick extends Sprite
 {
-
+	//CONSTANTS
+	private var POWERUP_PERCENTAGE:Float = 0.1;
+	private var FIFTY_PERCENT:Float = 0.5;
+	
+	//VARIABLES
 	private var type:BrickType;
 	private var xMapIndex:Int;
 	private var yMapIndex:Int;
@@ -40,7 +44,7 @@ class Brick extends Sprite
 		this.yMapIndex = y * brickWidth;
 		
 		//Will it have a powerup behind?
-		if (Math.random() <= 0.1) {
+		if (Math.random() <= POWERUP_PERCENTAGE) {
 			//Create a powerup behind (let's see which one)
 			this.powerUp = createPowerUp();
 			if (this.powerUp != null) {
@@ -53,28 +57,7 @@ class Brick extends Sprite
 		this.graphics.endFill();
 	}
 	
-	private function createPowerUp():PowerUp {
-		var whichPowerUp:Float = Math.random();
-		var powerUp:PowerUp;
-		
-		if (whichPowerUp <= 0.5 ) {
-			//Bigger Paddle
-			powerUp = new PowerUp(PowerUp.BIGGERPADDLE);
-		} else {
-			//Faster Paddle
-			powerUp = new PowerUp(PowerUp.FASTERPADDLE);
-		}
-		
-		return powerUp;
-	}
-	
-	public function collidedWithMe(ballX:Float, ballY:Float):Bool {
-		if ((ballX >= (xMapIndex) && ballX <= ((xMapIndex) + brickLength)) && (ballY >= (yMapIndex) && ballY <= ((yMapIndex) + brickWidth))) {
-			return true;
-		}
-		
-		return false;
-	}
+	/* GETTERS & SETTERS */
 	
 	public function getXMapIndex():Int {
 		return this.xMapIndex;
@@ -86,10 +69,6 @@ class Brick extends Sprite
 	
 	public function getBrickType():BrickType {
 		return this.type;
-	}
-	
-	public function playCollisionSound():Void {
-		this.collisionSound.play();
 	}
 	
 	public function setBrickType(brickType:BrickType) {
@@ -107,5 +86,41 @@ class Brick extends Sprite
 	
 	public function getPowerUp():PowerUp {
 		return this.powerUp;
+	}
+	
+	
+	/* PRIVATE METHODS */
+	
+	/*
+	 * Creates one of two available PowerUps (each with 50% chance).
+	 */
+	private function createPowerUp():PowerUp {
+		var whichPowerUp:Float = Math.random();
+		var powerUp:PowerUp;
+		
+		if (whichPowerUp <= FIFTY_PERCENT ) {
+			//Bigger Paddle
+			powerUp = new PowerUp(PowerUp.BIGGER_PADDLE);
+		} else {
+			//Faster Paddle
+			powerUp = new PowerUp(PowerUp.FASTER_PADDLE);
+		}
+		
+		return powerUp;
+	}
+	
+	
+	/* PUBLIC METHODS */
+	
+	public function collidedWithMe(ballX:Float, ballY:Float):Bool {
+		if ((ballX >= (xMapIndex) && ballX <= ((xMapIndex) + brickLength)) && (ballY >= (yMapIndex) && ballY <= ((yMapIndex) + brickWidth))) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public function playCollisionSound():Void {
+		this.collisionSound.play();
 	}
 }

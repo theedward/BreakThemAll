@@ -159,7 +159,7 @@ class ApplicationMain {
 		
 		config = {
 			
-			build: "50",
+			build: "63",
 			company: "Joao Seixas",
 			file: "BreakThemAll",
 			fps: 60,

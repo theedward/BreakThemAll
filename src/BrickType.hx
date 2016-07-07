@@ -6,6 +6,8 @@ package;
  */
 class BrickType
 {
+	
+	//CONSTANTS
 	public static var NORMALVALUE:Int = 50;
 	public static var STRONGVALUE:Int = 100;
 	public static var STRONGERVALUE:Int = 150;
@@ -18,6 +20,7 @@ class BrickType
 	public static var STRONGCOLOR:UInt = 0x95EF06;
 	public static var STRONGERCOLOR:UInt = 0x0AF5E5;
 	
+	//VARIABLES
 	private var value:Int;
 	private var durability:Int;
 	private var color:Int;
@@ -28,6 +31,9 @@ class BrickType
 		this.durability = durability;
 		this.color = color;
 	}
+	
+	
+	/* GETTERS & SETTERS */
 	
 	public function getValue():Int {
 		return this.value;

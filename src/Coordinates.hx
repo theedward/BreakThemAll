@@ -15,6 +15,8 @@ class Coordinates
 		this.y = y;
 	}
 	
+	/* GETTERS & SETTERS */
+	
 	public function getX():Int {
 		return this.x;
 	}

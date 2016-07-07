@@ -79,7 +79,7 @@ ApplicationMain.init = function() {
 	if(total == 0) ApplicationMain.start();
 };
 ApplicationMain.main = function() {
-	ApplicationMain.config = { build : "46", company : "Joao Seixas", file : "BreakThemAll", fps : 60, name : "BreakThemAll", orientation : "", packageName : "BreakThemAll", version : "1.0.0", windows : [{ antialiasing : 0, background : 0, borderless : false, depthBuffer : false, display : 0, fullscreen : false, hardware : false, height : 500, parameters : "{}", resizable : true, stencilBuffer : true, title : "BreakThemAll", vsync : false, width : 500, x : null, y : null}]};
+	ApplicationMain.config = { build : "62", company : "Joao Seixas", file : "BreakThemAll", fps : 60, name : "BreakThemAll", orientation : "", packageName : "BreakThemAll", version : "1.0.0", windows : [{ antialiasing : 0, background : 0, borderless : false, depthBuffer : false, display : 0, fullscreen : false, hardware : false, height : 500, parameters : "{}", resizable : true, stencilBuffer : true, title : "BreakThemAll", vsync : false, width : 500, x : null, y : null}]};
 };
 ApplicationMain.start = function() {
 	var hasMain = false;
@@ -1465,6 +1465,160 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		this.stage.addEventListener("enterFrame",$bind(this,this.gameLoop));
 		this.setGameState(GameState.Splash);
 	}
+	,keyDown: function(event) {
+		var _g = this.currentGameState;
+		switch(_g[1]) {
+		case 1:
+			var _g1 = event.keyCode;
+			this.setGameState(GameState.Paused);
+			break;
+		case 2:
+			var _g11 = event.keyCode;
+			switch(_g11) {
+			case 32:
+				this.updateScore();
+				this.setGameState(GameState.Playing);
+				break;
+			case 27:
+				this.removeChildFromStage(this.level);
+				this.removeChildFromStage(this.ball);
+				this.removeChildFromStage(this.platform);
+				this.removeChildFromStage(this.messageField);
+				if(this.sound) this.introChannel = this.introSound.play(0,this.NUM_REPEATS);
+				this.setGameState(GameState.MainMenu);
+				break;
+			case 37:
+				break;
+			case 39:
+				break;
+			default:
+			}
+			break;
+		case 3:
+			var _g12 = event.keyCode;
+			switch(_g12) {
+			case 32:
+				this.level.stopSound();
+				this.setGameState(GameState.Paused);
+				break;
+			case 37:
+				this.arrowKeyLeft = true;
+				break;
+			case 39:
+				this.arrowKeyRight = true;
+				break;
+			default:
+			}
+			break;
+		case 4:
+			var _g13 = event.keyCode;
+			switch(_g13) {
+			case 32:
+				this.level.stopSound();
+				this.resetGame(this.levels[0].getLevelName());
+				this.setGameState(GameState.Paused);
+				break;
+			case 27:
+				this.level.stopSound();
+				this.removeChildFromStage(this.level);
+				this.removeChildFromStage(this.ball);
+				this.removeChildFromStage(this.platform);
+				this.removeChildFromStage(this.messageField);
+				this.removeChildFromStage(this.gameLost);
+				this.introChannel = this.introSound.play(0,this.NUM_REPEATS);
+				this.setGameState(GameState.MainMenu);
+				break;
+			}
+			break;
+		case 5:
+			var _g14 = event.keyCode;
+			switch(_g14) {
+			case 32:
+				this.setGameState(GameState.Paused);
+				break;
+			case 27:
+				this.removeChildFromStage(this.level);
+				this.removeChildFromStage(this.ball);
+				this.removeChildFromStage(this.platform);
+				this.removeChildFromStage(this.messageField);
+				this.removeChildFromStage(this.gameWon);
+				this.setGameState(GameState.MainMenu);
+				break;
+			}
+			break;
+		case 0:
+			var _g15 = event.keyCode;
+			this.setGameState(GameState.MainMenu);
+			break;
+		}
+	}
+	,keyUp: function(event) {
+		var _g = this.currentGameState;
+		switch(_g[1]) {
+		case 1:
+			break;
+		case 2:
+			break;
+		case 3:
+			var _g1 = event.keyCode;
+			switch(_g1) {
+			case 37:
+				this.arrowKeyLeft = false;
+				break;
+			case 39:
+				this.arrowKeyRight = false;
+				break;
+			default:
+			}
+			break;
+		default:
+		}
+	}
+	,mouseMove: function(event) {
+		var _g = this.currentGameState;
+		switch(_g[1]) {
+		case 3:
+			this.platform.set_x(event.localX);
+			break;
+		default:
+		}
+	}
+	,startGameClick: function(event) {
+		this.setGameState(GameState.Paused);
+	}
+	,toggleSoundClick: function(event) {
+		this.sound = !this.sound;
+		if(this.sound) {
+			this.buttonSound.setText(this.SOUND_BUTTON_STRING_ON);
+			this.introChannel = this.introSound.play(0,this.NUM_REPEATS);
+		} else {
+			this.buttonSound.setText(this.SOUND_BUTTON_STRING_OFF);
+			this.introChannel.stop();
+		}
+	}
+	,gameLoop: function(event) {
+		var _g = this.currentGameState;
+		switch(_g[1]) {
+		case 1:
+			break;
+		case 3:
+			this.updateScore();
+			this.movePlatform();
+			this.moveBall();
+			this.bounceBall();
+			this.leftPoint = new openfl_geom_Point(this.ball.get_x() - this.ball.getBallRadius(),this.ball.get_y());
+			this.rightPoint = new openfl_geom_Point(this.ball.get_x() + this.ball.getBallRadius(),this.ball.get_y());
+			this.topPoint = new openfl_geom_Point(this.ball.get_x(),this.ball.get_y() - this.ball.getBallRadius());
+			this.bottomPoint = new openfl_geom_Point(this.ball.get_x(),this.ball.get_y() + this.ball.getBallRadius());
+			this.checkForBrickCollisions();
+			if(this.level.getBrickList().length == 0) this.setGameState(GameState.Won);
+			this.powerUpMovement();
+			break;
+		case 2:
+			break;
+		default:
+		}
+	}
 	,initGenericLevel: function() {
 		this.platform = new Platform();
 		this.platform.set_x(this.DEFAULT_PLATFORM_COORDINATES.getX());
@@ -1616,196 +1770,6 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 			break;
 		}
 	}
-	,keyDown: function(event) {
-		var _g = this.currentGameState;
-		switch(_g[1]) {
-		case 1:
-			var _g1 = event.keyCode;
-			this.setGameState(GameState.Paused);
-			break;
-		case 2:
-			var _g11 = event.keyCode;
-			switch(_g11) {
-			case 32:
-				this.updateScore();
-				this.setGameState(GameState.Playing);
-				break;
-			case 27:
-				this.removeChildFromStage(this.level);
-				this.removeChildFromStage(this.ball);
-				this.removeChildFromStage(this.platform);
-				this.removeChildFromStage(this.messageField);
-				this.level.stopSound();
-				if(this.sound) this.introChannel = this.introSound.play(0,this.NUM_REPEATS);
-				this.setGameState(GameState.MainMenu);
-				break;
-			case 37:
-				break;
-			case 39:
-				break;
-			default:
-			}
-			break;
-		case 3:
-			var _g12 = event.keyCode;
-			switch(_g12) {
-			case 32:
-				this.setGameState(GameState.Paused);
-				break;
-			case 37:
-				this.arrowKeyLeft = true;
-				break;
-			case 39:
-				this.arrowKeyRight = true;
-				break;
-			default:
-			}
-			break;
-		case 4:
-			var _g13 = event.keyCode;
-			switch(_g13) {
-			case 32:
-				this.level.stopSound();
-				this.resetGame(this.levels[0].getLevelName());
-				this.setGameState(GameState.Paused);
-				break;
-			case 27:
-				this.level.stopSound();
-				this.removeChildFromStage(this.level);
-				this.removeChildFromStage(this.ball);
-				this.removeChildFromStage(this.platform);
-				this.removeChildFromStage(this.messageField);
-				this.removeChildFromStage(this.gameLost);
-				this.introChannel = this.introSound.play(0,this.NUM_REPEATS);
-				this.setGameState(GameState.MainMenu);
-				break;
-			}
-			break;
-		case 5:
-			var _g14 = event.keyCode;
-			switch(_g14) {
-			case 32:
-				this.setGameState(GameState.Paused);
-				break;
-			case 27:
-				this.removeChildFromStage(this.level);
-				this.removeChildFromStage(this.ball);
-				this.removeChildFromStage(this.platform);
-				this.removeChildFromStage(this.messageField);
-				this.removeChildFromStage(this.gameWon);
-				this.setGameState(GameState.MainMenu);
-				break;
-			}
-			break;
-		case 0:
-			var _g15 = event.keyCode;
-			this.setGameState(GameState.MainMenu);
-			break;
-		}
-	}
-	,keyUp: function(event) {
-		var _g = this.currentGameState;
-		switch(_g[1]) {
-		case 1:
-			break;
-		case 2:
-			break;
-		case 3:
-			var _g1 = event.keyCode;
-			switch(_g1) {
-			case 37:
-				this.arrowKeyLeft = false;
-				break;
-			case 39:
-				this.arrowKeyRight = false;
-				break;
-			default:
-			}
-			break;
-		default:
-		}
-	}
-	,mouseMove: function(event) {
-		var _g = this.currentGameState;
-		switch(_g[1]) {
-		case 3:
-			this.platform.set_x(event.localX);
-			break;
-		default:
-		}
-	}
-	,startGameClick: function(event) {
-		this.setGameState(GameState.Paused);
-	}
-	,toggleSoundClick: function(event) {
-		this.sound = !this.sound;
-		if(this.sound) {
-			this.buttonSound.setText(this.SOUND_BUTTON_STRING_ON);
-			this.introChannel = this.introSound.play(0,this.NUM_REPEATS);
-		} else {
-			this.buttonSound.setText(this.SOUND_BUTTON_STRING_OFF);
-			this.introChannel.stop();
-		}
-	}
-	,gameLoop: function(event) {
-		var _g = this.currentGameState;
-		switch(_g[1]) {
-		case 1:
-			break;
-		case 3:
-			this.updateScore();
-			if(this.arrowKeyLeft) {
-				var _g1 = this.platform;
-				_g1.set_x(_g1.get_x() - this.platform.getPlatformSpeed());
-			}
-			if(this.arrowKeyRight) {
-				var _g11 = this.platform;
-				_g11.set_x(_g11.get_x() + this.platform.getPlatformSpeed());
-			}
-			if(this.platform.get_x() < this.PLATFORM_LEFT_LIMIT) this.platform.set_x(this.PLATFORM_LEFT_LIMIT);
-			if(this.platform.get_x() > this.PLATFORM_RIGHT_LIMIT) this.platform.set_x(this.PLATFORM_RIGHT_LIMIT);
-			var _g12 = this.ball;
-			_g12.set_x(_g12.get_x() + this.ball.getBallMovement().x);
-			var _g13 = this.ball;
-			_g13.set_y(_g13.get_y() + this.ball.getBallMovement().y);
-			if(this.ball.get_x() < this.BALL_BOUNCE_LEFT || this.ball.get_x() > this.BALL_BOUNCE_RIGHT) this.ball.setBallMovementXandY(this.ball.getBallMovement().x * -1,this.ball.getBallMovement().y);
-			if(this.ball.get_y() < this.BALL_BOUNCE_TOP) this.ball.setBallMovementXandY(this.ball.getBallMovement().x,this.ball.getBallMovement().y * -1);
-			if(this.ball.get_y() > this.DROP_ZONE) this.setGameState(GameState.Lost);
-			if(this.ball.getBallMovement().y > 0 && this.ball.get_y() > this.DEFAULT_BALL_COORDINATES.getY() && this.ball.get_x() >= this.platform.get_x() && this.ball.get_x() <= this.platform.get_x() + this.platform.getPlatformLength()) {
-				if(this.sound) this.platform.playPlatformSound();
-				this.ball.setBallMovementXandY(this.ball.getBallMovement().x,this.ball.getBallMovement().y * -1);
-			}
-			this.leftPoint = new openfl_geom_Point(this.ball.get_x() - this.ball.getBallRadius(),this.ball.get_y());
-			this.rightPoint = new openfl_geom_Point(this.ball.get_x() + this.ball.getBallRadius(),this.ball.get_y());
-			this.topPoint = new openfl_geom_Point(this.ball.get_x(),this.ball.get_y() - this.ball.getBallRadius());
-			this.bottomPoint = new openfl_geom_Point(this.ball.get_x(),this.ball.get_y() + this.ball.getBallRadius());
-			this.checkForBrickCollisions();
-			if(this.level.getBrickList().length == 0) this.setGameState(GameState.Won);
-			var powerUps = this.level.getPowerUpList();
-			if(powerUps.length > 0) {
-				var _g2 = 0;
-				var _g14 = powerUps.length;
-				while(_g2 < _g14) {
-					var i = _g2++;
-					var _g3 = powerUps[i].getImage();
-					_g3.set_y(_g3.get_y() + powerUps[i].getPowerUpSpeed());
-					if(powerUps[i].getImage().get_y() > this.DEFAULT_BALL_COORDINATES.getY() && powerUps[i].getImage().get_y() < this.DROP_ZONE && powerUps[i].getImage().get_x() >= this.platform.get_x() && powerUps[i].getImage().get_x() <= this.platform.get_x() + this.platform.getPlatformLength()) {
-						if(this.sound) this.level.playPowerUpSound();
-						this.level.applyPowerUp(powerUps[i],this.platform);
-						break;
-					}
-					if(powerUps[i].getImage().get_y() > this.DROP_ZONE) {
-						this.level.removePowerUp(powerUps[i]);
-						break;
-					}
-				}
-			}
-			break;
-		case 2:
-			break;
-		default:
-		}
-	}
 	,resetGame: function(currentLevel) {
 		this.ball.set_x(this.DEFAULT_BALL_COORDINATES.getX());
 		this.ball.set_y(this.DEFAULT_BALL_COORDINATES.getY());
@@ -1881,7 +1845,6 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 			currentFileName = assetsInput[i].split("/")[1].split(".")[0];
 			levels.push(new Level(currentFileName));
 		}
-		levels.reverse();
 		return levels;
 	}
 	,parseSounds: function(level) {
@@ -1897,7 +1860,6 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 				sounds.push(currentFileName);
 			}
 		}
-		sounds.reverse();
 		return sounds;
 	}
 	,goToNextLevel: function(level,sound) {
@@ -1916,6 +1878,54 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 			this.stage.removeChild(child);
 			return true;
 		} else return false;
+	}
+	,movePlatform: function() {
+		if(this.arrowKeyLeft) {
+			var _g = this.platform;
+			_g.set_x(_g.get_x() - this.platform.getPlatformSpeed());
+		}
+		if(this.arrowKeyRight) {
+			var _g1 = this.platform;
+			_g1.set_x(_g1.get_x() + this.platform.getPlatformSpeed());
+		}
+		if(this.platform.get_x() < this.PLATFORM_LEFT_LIMIT) this.platform.set_x(this.PLATFORM_LEFT_LIMIT);
+		if(this.platform.get_x() > this.PLATFORM_RIGHT_LIMIT) this.platform.set_x(this.PLATFORM_RIGHT_LIMIT);
+	}
+	,bounceBall: function() {
+		if(this.ball.getBallMovement().y > 0 && this.ball.get_y() > this.DEFAULT_BALL_COORDINATES.getY() && this.ball.get_x() >= this.platform.get_x() && this.ball.get_x() <= this.platform.get_x() + this.platform.getPlatformLength()) {
+			if(this.sound) this.platform.playPlatformSound();
+			this.ball.setBallMovementXandY(this.ball.getBallMovement().x,this.ball.getBallMovement().y * -1);
+		}
+	}
+	,moveBall: function() {
+		var _g = this.ball;
+		_g.set_x(_g.get_x() + this.ball.getBallMovement().x);
+		var _g1 = this.ball;
+		_g1.set_y(_g1.get_y() + this.ball.getBallMovement().y);
+		if(this.ball.get_x() < this.BALL_BOUNCE_LEFT || this.ball.get_x() > this.BALL_BOUNCE_RIGHT) this.ball.setBallMovementXandY(this.ball.getBallMovement().x * -1,this.ball.getBallMovement().y);
+		if(this.ball.get_y() < this.BALL_BOUNCE_TOP) this.ball.setBallMovementXandY(this.ball.getBallMovement().x,this.ball.getBallMovement().y * -1);
+		if(this.ball.get_y() > this.DROP_ZONE) this.setGameState(GameState.Lost);
+	}
+	,powerUpMovement: function() {
+		var powerUps = this.level.getPowerUpList();
+		if(powerUps.length > 0) {
+			var _g1 = 0;
+			var _g = powerUps.length;
+			while(_g1 < _g) {
+				var i = _g1++;
+				var _g2 = powerUps[i].getImage();
+				_g2.set_y(_g2.get_y() + powerUps[i].getPowerUpSpeed());
+				if(powerUps[i].getImage().get_y() > this.DEFAULT_BALL_COORDINATES.getY() && powerUps[i].getImage().get_y() < this.DROP_ZONE && powerUps[i].getImage().get_x() >= this.platform.get_x() && powerUps[i].getImage().get_x() <= this.platform.get_x() + this.platform.getPlatformLength()) {
+					if(this.sound) this.level.playPowerUpSound();
+					this.level.applyPowerUp(powerUps[i],this.platform);
+					break;
+				}
+				if(powerUps[i].getImage().get_y() > this.DROP_ZONE) {
+					this.level.removePowerUp(powerUps[i]);
+					break;
+				}
+			}
+		}
 	}
 	,added: function(e) {
 		this.removeEventListener("addedToStage",$bind(this,this.added));
@@ -1937,8 +1947,9 @@ DocumentClass.prototype = $extend(Main.prototype,{
 });
 var Ball = function() {
 	this.ballRadius = 5;
+	this.COLOR_WHITE = 16777215;
 	openfl_display_Sprite.call(this);
-	this.get_graphics().beginFill(16777215);
+	this.get_graphics().beginFill(this.COLOR_WHITE);
 	this.get_graphics().drawCircle(0,0,this.ballRadius * 2);
 	this.get_graphics().endFill();
 };
@@ -1982,6 +1993,8 @@ var Brick = function(type,x,y) {
 	this.poweredUp = false;
 	this.brickWidth = 20;
 	this.brickLength = 30;
+	this.FIFTY_PERCENT = 0.5;
+	this.POWERUP_PERCENTAGE = 0.1;
 	openfl_display_Sprite.call(this);
 	switch(type[1]) {
 	case 0:
@@ -1996,7 +2009,7 @@ var Brick = function(type,x,y) {
 	}
 	this.xMapIndex = x * this.brickLength;
 	this.yMapIndex = y * this.brickWidth;
-	if(Math.random() <= 0.1) {
+	if(Math.random() <= this.POWERUP_PERCENTAGE) {
 		this.powerUp = this.createPowerUp();
 		if(this.powerUp != null) this.poweredUp = true;
 	}
@@ -2008,17 +2021,7 @@ $hxClasses["Brick"] = Brick;
 Brick.__name__ = ["Brick"];
 Brick.__super__ = openfl_display_Sprite;
 Brick.prototype = $extend(openfl_display_Sprite.prototype,{
-	createPowerUp: function() {
-		var whichPowerUp = Math.random();
-		var powerUp;
-		if(whichPowerUp <= 0.5) powerUp = new PowerUp(PowerUp.BIGGERPADDLE); else powerUp = new PowerUp(PowerUp.FASTERPADDLE);
-		return powerUp;
-	}
-	,collidedWithMe: function(ballX,ballY) {
-		if(ballX >= this.xMapIndex && ballX <= this.xMapIndex + this.brickLength && (ballY >= this.yMapIndex && ballY <= this.yMapIndex + this.brickWidth)) return true;
-		return false;
-	}
-	,getXMapIndex: function() {
+	getXMapIndex: function() {
 		return this.xMapIndex;
 	}
 	,getYMapIndex: function() {
@@ -2026,9 +2029,6 @@ Brick.prototype = $extend(openfl_display_Sprite.prototype,{
 	}
 	,getBrickType: function() {
 		return this.type;
-	}
-	,playCollisionSound: function() {
-		this.collisionSound.play();
 	}
 	,setBrickType: function(brickType) {
 		this.type = brickType;
@@ -2042,6 +2042,19 @@ Brick.prototype = $extend(openfl_display_Sprite.prototype,{
 	}
 	,getPowerUp: function() {
 		return this.powerUp;
+	}
+	,createPowerUp: function() {
+		var whichPowerUp = Math.random();
+		var powerUp;
+		if(whichPowerUp <= this.FIFTY_PERCENT) powerUp = new PowerUp(PowerUp.BIGGER_PADDLE); else powerUp = new PowerUp(PowerUp.FASTER_PADDLE);
+		return powerUp;
+	}
+	,collidedWithMe: function(ballX,ballY) {
+		if(ballX >= this.xMapIndex && ballX <= this.xMapIndex + this.brickLength && (ballY >= this.yMapIndex && ballY <= this.yMapIndex + this.brickWidth)) return true;
+		return false;
+	}
+	,playCollisionSound: function() {
+		this.collisionSound.play();
 	}
 	,__class__: Brick
 });
@@ -2403,6 +2416,18 @@ var Level = function(fileName) {
 	this.currentScore = 0;
 	this.powerUpList = [];
 	this.brickList = [];
+	this.FILE_NOT_FOUND_STRING = "[ERROR]: File was not found!";
+	this.DEFAULT_GAME_SPEED = 7;
+	this.NUM_REPEATS = 100;
+	this.POWER_UP_SCALE_DOWN = 0.25;
+	this.POWER_UP_TIMEOUT_MS = 5000;
+	this.SCALE_DOWN = 0.75;
+	this.SCALE_UP = 1.75;
+	this.STRONGER_BRICK = 3;
+	this.STRONG_BRICK = 2;
+	this.NORMAL_BRICK = 1;
+	this.LEVEL_MAP_WIDTH = 16;
+	this.LEVEL_MAP_LENGTH = 18;
 	openfl_display_Sprite.call(this);
 	this.levelName = fileName;
 	this.map = this.createLevel(fileName);
@@ -2412,24 +2437,48 @@ $hxClasses["Level"] = Level;
 Level.__name__ = ["Level"];
 Level.__super__ = openfl_display_Sprite;
 Level.prototype = $extend(openfl_display_Sprite.prototype,{
-	iterateThroughMap: function(map) {
+	getBrickList: function() {
+		return this.brickList;
+	}
+	,getPowerUpList: function() {
+		return this.powerUpList;
+	}
+	,setSound: function(fileName) {
+		var levelSound = openfl_Assets.getMusic("audio/levels/" + fileName + ".wav");
+		if(levelSound == null) haxe_Log.trace(this.FILE_NOT_FOUND_STRING,{ fileName : "Level.hx", lineNumber : 67, className : "Level", methodName : "setSound"}); else this.sound = levelSound;
+	}
+	,getSound: function() {
+		return this.sound;
+	}
+	,getCurrentScore: function() {
+		return this.currentScore;
+	}
+	,getLevelName: function() {
+		return this.levelName;
+	}
+	,setCurrentScore: function(score) {
+		this.currentScore = score;
+	}
+	,iterateThroughMap: function(map) {
 		var brick;
-		var _g = 0;
-		while(_g < 18) {
-			var y = _g++;
-			var _g1 = 0;
-			while(_g1 < 16) {
-				var x = _g1++;
+		var _g1 = 0;
+		var _g = this.LEVEL_MAP_LENGTH;
+		while(_g1 < _g) {
+			var y = _g1++;
+			var _g3 = 0;
+			var _g2 = this.LEVEL_MAP_WIDTH;
+			while(_g3 < _g2) {
+				var x = _g3++;
 				if(map[y][x] == 0) {
-				} else if(map[y][x] == 1) {
+				} else if(map[y][x] == this.NORMAL_BRICK) {
 					brick = new Brick(BrickTypes.Normal,x,y);
 					this.brickList.push(brick);
 					this.addChild(brick);
-				} else if(map[y][x] == 2) {
+				} else if(map[y][x] == this.STRONG_BRICK) {
 					brick = new Brick(BrickTypes.Strong,x,y);
 					this.brickList.push(brick);
 					this.addChild(brick);
-				} else if(map[y][x] == 3) {
+				} else if(map[y][x] == this.STRONGER_BRICK) {
 					brick = new Brick(BrickTypes.Stronger,x,y);
 					this.brickList.push(brick);
 					this.addChild(brick);
@@ -2437,11 +2486,70 @@ Level.prototype = $extend(openfl_display_Sprite.prototype,{
 			}
 		}
 	}
-	,getBrickList: function() {
-		return this.brickList;
+	,handleBrickRemoval: function(brick) {
+		var _g = brick.getBrickType().getDurability();
+		switch(_g) {
+		case 1:
+			HxOverrides.remove(this.brickList,brick);
+			this.removeBrick(brick);
+			if(brick.hasPowerUp()) this.handlePowerUp(brick);
+			this.currentScore += brick.getBrickType().getValue();
+			break;
+		case 2:
+			brick.setBrickType(new BrickType(BrickType.NORMALVALUE,BrickType.NORMALDURABILITY,BrickType.NORMALCOLOR));
+			this.currentScore += brick.getBrickType().getValue();
+			break;
+		case 3:
+			brick.setBrickType(new BrickType(BrickType.STRONGVALUE,BrickType.STRONGDURABILITY,BrickType.STRONGCOLOR));
+			this.currentScore += brick.getBrickType().getValue();
+			break;
+		}
 	}
-	,getPowerUpList: function() {
-		return this.powerUpList;
+	,handlePowerUp: function(brick) {
+		var splashImage = new openfl_display_Bitmap(brick.getPowerUp().getImageData());
+		splashImage.set_scaleX(this.POWER_UP_SCALE_DOWN);
+		splashImage.set_scaleY(this.POWER_UP_SCALE_DOWN);
+		splashImage.set_x(brick.getXMapIndex());
+		splashImage.set_y(brick.getYMapIndex());
+		brick.getPowerUp().setImage(splashImage);
+		this.powerUpList.push(brick.getPowerUp());
+		this.addChild(splashImage);
+	}
+	,undoPowerUp: function(powerUp,platform) {
+		var _g = powerUp.getType();
+		switch(_g) {
+		case "BiggerPaddle":
+			platform.setPlatformLength(platform.getPlatformLength() / 2);
+			platform.set_scaleX(this.SCALE_DOWN);
+			break;
+		case "FasterPaddle":
+			platform.setPlatformSpeed(platform.getPlatformSpeed() - this.DEFAULT_GAME_SPEED);
+			break;
+		default:
+		}
+	}
+	,createLevel: function(levelFile) {
+		var map = [];
+		var input = openfl_Assets.getText("levels/" + levelFile + ".txt");
+		if(input == null) haxe_Log.trace(this.FILE_NOT_FOUND_STRING,{ fileName : "Level.hx", lineNumber : 204, className : "Level", methodName : "createLevel"}); else {
+			var rows = input.split("]");
+			var columnValues;
+			var _g1 = 0;
+			var _g = rows.length;
+			while(_g1 < _g) {
+				var i = _g1++;
+				var line = [];
+				columnValues = rows[i].split(",");
+				var _g3 = 0;
+				var _g2 = columnValues.length;
+				while(_g3 < _g2) {
+					var j = _g3++;
+					line.push(Std.parseInt(columnValues[j]));
+				}
+				map.push(line);
+			}
+		}
+		return map;
 	}
 	,checkForBrickCollisions: function(ballX,ballY) {
 		var _g1 = 0;
@@ -2481,15 +2589,8 @@ Level.prototype = $extend(openfl_display_Sprite.prototype,{
 	,removeBrick: function(brick) {
 		this.removeChild(brick);
 	}
-	,setSound: function(fileName) {
-		var levelSound = openfl_Assets.getMusic("audio/levels/" + fileName + ".wav");
-		if(levelSound == null) haxe_Log.trace("[ERROR]: File was not found!",{ fileName : "Level.hx", lineNumber : 118, className : "Level", methodName : "setSound"}); else this.sound = levelSound;
-	}
-	,getSound: function() {
-		return this.sound;
-	}
 	,playSound: function() {
-		this.soundChannel = this.sound.play(0,100);
+		this.soundChannel = this.sound.play(0,this.NUM_REPEATS);
 	}
 	,stopSound: function() {
 		this.soundChannel.stop();
@@ -2500,94 +2601,20 @@ Level.prototype = $extend(openfl_display_Sprite.prototype,{
 		switch(_g1) {
 		case "BiggerPaddle":
 			platform.setPlatformLength(platform.getPlatformLength() + platform.getPlatformLength());
-			platform.set_scaleX(1.75);
+			platform.set_scaleX(this.SCALE_UP);
 			break;
 		case "FasterPaddle":
-			platform.setPlatformSpeed(platform.getPlatformSpeed() + 7);
+			platform.setPlatformSpeed(platform.getPlatformSpeed() + this.DEFAULT_GAME_SPEED);
 			break;
 		default:
 		}
 		haxe_Timer.delay(function() {
 			_g.undoPowerUp(powerUp,platform);
-		},5000);
+		},this.POWER_UP_TIMEOUT_MS);
 		this.removePowerUp(powerUp);
-	}
-	,getCurrentScore: function() {
-		return this.currentScore;
-	}
-	,getLevelName: function() {
-		return this.levelName;
 	}
 	,playPowerUpSound: function() {
 		this.powerUpSound.play();
-	}
-	,setCurrentScore: function(score) {
-		this.currentScore = score;
-	}
-	,handleBrickRemoval: function(brick) {
-		var _g = brick.getBrickType().getDurability();
-		switch(_g) {
-		case 1:
-			HxOverrides.remove(this.brickList,brick);
-			this.removeBrick(brick);
-			if(brick.hasPowerUp()) this.handlePowerUp(brick);
-			this.currentScore += brick.getBrickType().getValue();
-			break;
-		case 2:
-			brick.setBrickType(new BrickType(BrickType.NORMALVALUE,BrickType.NORMALDURABILITY,BrickType.NORMALCOLOR));
-			this.currentScore += brick.getBrickType().getValue();
-			break;
-		case 3:
-			brick.setBrickType(new BrickType(BrickType.STRONGVALUE,BrickType.STRONGDURABILITY,BrickType.STRONGCOLOR));
-			this.currentScore += brick.getBrickType().getValue();
-			break;
-		}
-	}
-	,handlePowerUp: function(brick) {
-		var splashImage = new openfl_display_Bitmap(brick.getPowerUp().getImageData());
-		splashImage.set_scaleX(0.25);
-		splashImage.set_scaleY(0.25);
-		splashImage.set_x(brick.getXMapIndex());
-		splashImage.set_y(brick.getYMapIndex());
-		brick.getPowerUp().setImage(splashImage);
-		this.powerUpList.push(brick.getPowerUp());
-		this.addChild(splashImage);
-	}
-	,undoPowerUp: function(powerUp,platform) {
-		var _g = powerUp.getType();
-		switch(_g) {
-		case "BiggerPaddle":
-			platform.setPlatformLength(platform.getPlatformLength() / 2);
-			platform.set_scaleX(0.75);
-			break;
-		case "FasterPaddle":
-			platform.setPlatformSpeed(platform.getPlatformSpeed() - 7);
-			break;
-		default:
-		}
-	}
-	,createLevel: function(levelFile) {
-		var map = [];
-		var input = openfl_Assets.getText("levels/" + levelFile + ".txt");
-		if(input == null) haxe_Log.trace("[ERROR]: File was not found!",{ fileName : "Level.hx", lineNumber : 224, className : "Level", methodName : "createLevel"}); else {
-			var rows = input.split("]");
-			var columnValues;
-			var _g1 = 0;
-			var _g = rows.length;
-			while(_g1 < _g) {
-				var i = _g1++;
-				var line = [];
-				columnValues = rows[i].split(",");
-				var _g3 = 0;
-				var _g2 = columnValues.length;
-				while(_g3 < _g2) {
-					var j = _g3++;
-					line.push(Std.parseInt(columnValues[j]));
-				}
-				map.push(line);
-			}
-		}
-		return map;
 	}
 	,__class__: Level
 });
@@ -2647,19 +2674,24 @@ BallCollision.Bottom.toString = $estr;
 BallCollision.Bottom.__enum__ = BallCollision;
 Math.__name__ = ["Math"];
 var MenuButton = function(x,y,width,height,text) {
+	this.TEXT_FIELD_ELEVATION = 15;
+	this.LETTER_SIZE = 16;
+	this.COLOR_WHITE = 16777215;
+	this.COLOR_ORANGE = 16756019;
+	this.DEFAULT_LETTER_TYPE = "_sans";
 	openfl_display_Sprite.call(this);
-	var messageFormat = new openfl_text_TextFormat("_sans",16,16777215,true);
+	var messageFormat = new openfl_text_TextFormat(this.DEFAULT_LETTER_TYPE,this.LETTER_SIZE,this.COLOR_WHITE,true);
 	messageFormat.align = 0;
 	this.textField = new openfl_text_TextField();
 	this.textField.set_x(x);
-	this.textField.set_y(y + 15);
+	this.textField.set_y(y + this.TEXT_FIELD_ELEVATION);
 	this.textField.set_width(width);
 	this.textField.set_height(height);
 	this.textField.set_defaultTextFormat(messageFormat);
 	this.textField.set_selectable(true);
 	this.textField.set_text(text);
 	this.addChild(this.textField);
-	this.get_graphics().beginFill(16756019);
+	this.get_graphics().beginFill(this.COLOR_ORANGE);
 	this.get_graphics().drawRect(x,y,width,height);
 	this.get_graphics().endFill();
 };
@@ -2731,8 +2763,9 @@ var Platform = function() {
 	this.platformSound = openfl_Assets.getMusic("audio/ball_hit_platform.wav");
 	this.platformWidth = 15;
 	this.platformLength = 100;
+	this.COLOR_ORANGE = 16756019;
 	openfl_display_Sprite.call(this);
-	this.get_graphics().beginFill(16756019);
+	this.get_graphics().beginFill(this.COLOR_ORANGE);
 	this.get_graphics().drawRect(0,0,this.platformLength,this.platformWidth);
 	this.get_graphics().endFill();
 };
@@ -3018,9 +3051,12 @@ var Wall = function() { };
 $hxClasses["Wall"] = Wall;
 Wall.__name__ = ["Wall"];
 var WallHorizontal = function() {
+	this.COLOR_WHITE = 16777215;
+	this.HORIZONTAL_WALL_HEIGHT = 10;
+	this.HORIZONTAL_WALL_WIDTH = 500;
 	openfl_display_Sprite.call(this);
-	this.get_graphics().beginFill(16777215);
-	this.get_graphics().drawRect(0,0,500,10);
+	this.get_graphics().beginFill(this.COLOR_WHITE);
+	this.get_graphics().drawRect(0,0,this.HORIZONTAL_WALL_WIDTH,this.HORIZONTAL_WALL_HEIGHT);
 	this.get_graphics().endFill();
 };
 $hxClasses["WallHorizontal"] = WallHorizontal;
@@ -3031,9 +3067,12 @@ WallHorizontal.prototype = $extend(openfl_display_Sprite.prototype,{
 	__class__: WallHorizontal
 });
 var WallVertical = function() {
+	this.COLOR_WHITE = 16777215;
+	this.VERTICAL_WALL_WIDTH = 10;
+	this.VERTICAL_WALL_HEIGHT = 500;
 	openfl_display_Sprite.call(this);
-	this.get_graphics().beginFill(16777215);
-	this.get_graphics().drawRect(0,0,10,500);
+	this.get_graphics().beginFill(this.COLOR_WHITE);
+	this.get_graphics().drawRect(0,0,this.VERTICAL_WALL_WIDTH,this.VERTICAL_WALL_HEIGHT);
 	this.get_graphics().endFill();
 };
 $hxClasses["WallVertical"] = WallVertical;
@@ -36884,8 +36923,8 @@ BrickType.STRONGERDURABILITY = 3;
 BrickType.NORMALCOLOR = 14273287;
 BrickType.STRONGCOLOR = 9826054;
 BrickType.STRONGERCOLOR = 718309;
-PowerUp.BIGGERPADDLE = "BiggerPaddle";
-PowerUp.FASTERPADDLE = "FasterPaddle";
+PowerUp.BIGGER_PADDLE = "BiggerPaddle";
+PowerUp.FASTER_PADDLE = "FasterPaddle";
 haxe_ds_ObjectMap.count = 0;
 haxe_io_FPHelper.i64tmp = (function($this) {
 	var $r;

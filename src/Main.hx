@@ -186,7 +186,6 @@ class Main extends Sprite
 						removeChildFromStage(ball);
 						removeChildFromStage(platform);
 						removeChildFromStage(messageField);
-						this.level.stopSound();
 						if (sound) {
 							introChannel = introSound.play(0, NUM_REPEATS);
 						}
@@ -201,6 +200,7 @@ class Main extends Sprite
 			case Playing:
 				switch(event.keyCode) {
 					case 32:
+						this.level.stopSound();
 						setGameState(Paused);
 					case 37:
 						arrowKeyLeft = true;
@@ -299,6 +299,10 @@ class Main extends Sprite
 	}
 	
 	//Game Loop
+	/**
+	 * Function that runs on every frame
+	 * 
+	 */
 	private function gameLoop(event:Event):Void {
 		switch(currentGameState) {
 			case MainMenu:
@@ -307,35 +311,15 @@ class Main extends Sprite
 				updateScore();
 				
 				//Platform Movement Code
-				if (arrowKeyLeft) {
-					platform.x -= platform.getPlatformSpeed();
-				}
-				
-				if (arrowKeyRight) {
-					platform.x += platform.getPlatformSpeed();
-				}
-				
-				if (platform.x < PLATFORM_LEFT_LIMIT) platform.x = PLATFORM_LEFT_LIMIT;
-				if (platform.x > PLATFORM_RIGHT_LIMIT) platform.x = PLATFORM_RIGHT_LIMIT;
+				movePlatform();
 				
 				//Ball Movement Code
-				ball.x += ball.getBallMovement().x;
-				ball.y += ball.getBallMovement().y;
-				if (ball.x < BALL_BOUNCE_LEFT || ball.x > BALL_BOUNCE_RIGHT) ball.setBallMovementXandY(ball.getBallMovement().x * -1, ball.getBallMovement().y); // Go to Oposite X direction, when touching a vertical wall
-				if (ball.y < BALL_BOUNCE_TOP) ball.setBallMovementXandY(ball.getBallMovement().x, ball.getBallMovement().y * -1); //Go to the Oposite Y direction when touching an horizontal wall
-				if (ball.y > DROP_ZONE) setGameState(Lost);
+				moveBall();
 				
-				//Ball Bouncing Code
-				//Logic: Check if the ball is going down and is close to touching the platform. Then Check if the ball is within boundaries of the platform
-				if (ball.getBallMovement().y > 0 && ball.y > DEFAULT_BALL_COORDINATES.getY() && ball.x >= platform.x && ball.x <= platform.x + platform.getPlatformLength()) {
-					if (sound) {
-						platform.playPlatformSound();
-					}
-					ball.setBallMovementXandY(ball.getBallMovement().x, ball.getBallMovement().y * -1);
-					//ball.setBallMovement(new Point(Math.cos(MathHelper.calculateBallBounceAngle(ball.x,platform.getPlatformLength())) * ball.getBallSpeed(), Math.sin(MathHelper.calculateBallBounceAngle(ball.x,platform.getPlatformLength()/2)) * ball.getBallSpeed()));
-				}
+				//Ball Bounce
+				bounceBall();
 				
-				//BALL COLLISION POINTS
+				//Ball Collision Points
 				leftPoint = new Point(ball.x - ball.getBallRadius(), ball.y);
 				rightPoint = new Point(ball.x + ball.getBallRadius(), ball.y);
 				
@@ -346,26 +330,8 @@ class Main extends Sprite
 				
 				if (level.getBrickList().length == 0) setGameState(Won);
 				
-				//POWERUP MOVEMENT
-				var powerUps:Array<PowerUp> = level.getPowerUpList();
-				if (powerUps.length > 0) {
-					for (i in 0...powerUps.length) {
-						powerUps[i].getImage().y += powerUps[i].getPowerUpSpeed();
-						
-						if (powerUps[i].getImage().y > DEFAULT_BALL_COORDINATES.getY() && powerUps[i].getImage().y < DROP_ZONE && powerUps[i].getImage().x >= platform.x && powerUps[i].getImage().x <= platform.x + platform.getPlatformLength()) {
-							if (sound) {
-								level.playPowerUpSound();
-							}
-							level.applyPowerUp(powerUps[i], platform);
-							break;
-						}
-						
-						if (powerUps[i].getImage().y > DROP_ZONE) {
-							level.removePowerUp(powerUps[i]);
-							break;
-						}
-					}
-				}
+				//PowerUp Movement
+				powerUpMovement();
 				
 			case Paused:
 				//Do Nothing
@@ -511,7 +477,11 @@ class Main extends Sprite
 		buttonSound.buttonMode = true;
 		buttonSound.addEventListener(MouseEvent.CLICK, toggleSoundClick);
 	}
-		
+	
+	/*
+	 * Makes the transitions between states in the game.
+	 * Mostly adds/removes elements in each state
+	 */
 	private function setGameState(state:GameState):Void {
 		currentGameState = state;
 		
@@ -568,6 +538,7 @@ class Main extends Sprite
 	}
 	
 	private function resetGame(currentLevel:String):Void {
+		//Re Init Level Elements
 		ball.x = DEFAULT_BALL_COORDINATES.getX();
 		ball.y = DEFAULT_BALL_COORDINATES.getY();
 		
@@ -588,7 +559,7 @@ class Main extends Sprite
 			
 		this.level.reload(currentLevel);
 		
-		//INIT BALL MOVEMENT
+		//Re Init Ball Movement Speed
 		ball.setBallSpeed(DEFAULT_GAME_SPEED);
 		var randomPositiveAngle:Float = Math.random() * -1 * Math.PI;
 		ball.setBallMovement(new Point(Math.cos(randomPositiveAngle) * ball.getBallSpeed(), Math.sin(randomPositiveAngle) * ball.getBallSpeed()));
@@ -603,8 +574,13 @@ class Main extends Sprite
 		scoreField.text = SCORE_STRING + scorePlayer; //"Score: "
 	}	
 		
+	/*
+	 * Ball is defined as four points (top, right, bottom, left).
+	 * Each of these is tested for collisions, because the ball can collide with more than one brick.
+	 * In case of collision the handleBrickCollision function is added, and the point that collided is passed as argument.
+	 */
 	private function checkForBrickCollisions() {
-		//Check for collisions on each of the four points
+		
 		var brick:Brick = level.checkForBrickCollisions(leftPoint.x, leftPoint.y);
 		if (brick != null) {
 			if (sound) {
@@ -647,6 +623,10 @@ class Main extends Sprite
 		
 	}
 	
+	/*
+	 * If the collision is left/right invert the movement in the X axis.
+	 * If the collision is top/bottom invert the movement in the Y axis.
+	 */
 	private function handleBrickCollision(collisionSide:BallCollision) {
 		//Invert ball movement
 		switch(collisionSide) {
@@ -663,6 +643,11 @@ class Main extends Sprite
 		}
 	}
 	
+	/*
+	 * Lists the text files present in assets (should go to assets/levels).
+	 * Creates an Array of Strings that are the file names present, parsed without the directory or extension.
+	 * This Array is to be fed to the level creation.
+	 */
 	private function parseLevels():Array<Level> {
 		var levels:Array<Level> = new Array<Level>();
 		var assetsInput:Array<String> = Assets.list(AssetType.TEXT);
@@ -674,12 +659,14 @@ class Main extends Sprite
 			levels.push(new Level(currentFileName));
 		}
 		
-		//The function is parsing Level3, Level2, Level1, so I have to reverse the order
-		levels.reverse();
-		
 		return levels;
 	}
 	
+	/*
+	 * Function similar to parseLevels.
+	 * Gets assets from Asset.Type.SOUND and parses the ones that are under audio/levels.
+	 * Adds the file name of the sound files for each level to an Array.
+	 */
 	private function parseSounds(level:Level):Array<String> {
 		var sounds:Array<String> = new Array<String>();
 		var assetsInput:Array<String> = Assets.list(AssetType.SOUND);
@@ -692,11 +679,12 @@ class Main extends Sprite
 			}
 		}
 		
-		sounds.reverse();
-		
 		return sounds;
 	}
-	
+		
+	/*
+	 * Function that decides if the game has more levels to play or if the game has ended.
+	 */
 	private function goToNextLevel(level:Level, sound:String):Bool {
 		level.stopSound();
 		levels.remove(level);
@@ -713,6 +701,10 @@ class Main extends Sprite
 		return false;
 	}
 	
+	/*
+	 * Function to safely remove elements from the stage
+	 * Needed due to flash!
+	 */
 	private function removeChildFromStage(child:DisplayObject):Bool {
 		if (stage.contains(child)) {
 			stage.removeChild(child);
@@ -722,6 +714,79 @@ class Main extends Sprite
 		}
 	}
 	
+	/*
+	 * If the left/right arrow key is pressed, move the platform according to the platform speed.
+	 * If the platform is near the left or right wall don't allow the platform to keep on moving.
+	 */
+	private function movePlatform():Void {
+		if (arrowKeyLeft) {
+			platform.x -= platform.getPlatformSpeed();
+		}
+		
+		if (arrowKeyRight) {
+			platform.x += platform.getPlatformSpeed();
+		}
+		
+		if (platform.x < PLATFORM_LEFT_LIMIT) platform.x = PLATFORM_LEFT_LIMIT;
+		if (platform.x > PLATFORM_RIGHT_LIMIT) platform.x = PLATFORM_RIGHT_LIMIT;
+	}
+	
+	/*
+	 * Ball Bouncing Code
+	 * Logic: Check if the ball is going down and is close to touching the platform. 
+	 * Then check if the ball is within boundaries of the platform.
+	 */
+	private function bounceBall():Void {
+		if (ball.getBallMovement().y > 0 && ball.y > DEFAULT_BALL_COORDINATES.getY() && ball.x >= platform.x && ball.x <= platform.x + platform.getPlatformLength()) {
+			if (sound) {
+				platform.playPlatformSound();
+			}
+			ball.setBallMovementXandY(ball.getBallMovement().x, ball.getBallMovement().y * -1);
+		}
+	}
+	
+	/*
+	 * Ball Movement Code
+	 * Get current ball position
+	 * Check if its close to either the left or the right wall, and reverse its movement in the X axis if it is
+	 * Check if its close to the top wall and reverse the movement in the Y axis if it is
+	 * If its below the drop zone (where you lose) go to game state Lost
+	 */
+	private function moveBall():Void {
+		ball.x += ball.getBallMovement().x;
+		ball.y += ball.getBallMovement().y;
+		if (ball.x < BALL_BOUNCE_LEFT || ball.x > BALL_BOUNCE_RIGHT) ball.setBallMovementXandY(ball.getBallMovement().x * -1, ball.getBallMovement().y); // Go to Oposite X direction, when touching a vertical wall
+		if (ball.y < BALL_BOUNCE_TOP) ball.setBallMovementXandY(ball.getBallMovement().x, ball.getBallMovement().y * -1); //Go to the Oposite Y direction when touching an horizontal wall
+		if (ball.y > DROP_ZONE) setGameState(Lost);
+	}
+	
+	/*
+	 * Grab all PowerUps from the Level
+	 * Move the PowerUp (its image) according to the PowerUp speed.
+	 * If it's close to the platform, test for collisions with the platform, and apply the PowerUp if it collides.
+	 * If it's on the drop zone (area where it disappears), remove it.
+	 */
+	private function powerUpMovement():Void {
+		var powerUps:Array<PowerUp> = level.getPowerUpList();
+		if (powerUps.length > 0) {
+			for (i in 0...powerUps.length) {
+				powerUps[i].getImage().y += powerUps[i].getPowerUpSpeed();
+				
+				if (powerUps[i].getImage().y > DEFAULT_BALL_COORDINATES.getY() && powerUps[i].getImage().y < DROP_ZONE && powerUps[i].getImage().x >= platform.x && powerUps[i].getImage().x <= platform.x + platform.getPlatformLength()) {
+					if (sound) {
+						level.playPowerUpSound();
+					}
+					level.applyPowerUp(powerUps[i], platform);
+					break;
+				}
+				
+				if (powerUps[i].getImage().y > DROP_ZONE) {
+					level.removePowerUp(powerUps[i]);
+					break;
+				}
+			}
+		}
+	}
 	
 	/* SETUP */
 

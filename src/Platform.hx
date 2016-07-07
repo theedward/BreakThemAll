@@ -5,7 +5,11 @@ import openfl.Assets;
 
 class Platform extends Sprite
 {
-
+	//CONSTANTS
+	//Copy from Main.hx
+	private var COLOR_ORANGE:Int = 0xffad33;
+	
+	//VARIABLES
 	private var platformSpeed:Int;
 	private var platformLength:Float = 100;
 	private var platformWidth:Int = 15;
@@ -15,10 +19,13 @@ class Platform extends Sprite
 	{
 		super();
 
-		this.graphics.beginFill(0xffad33);
+		this.graphics.beginFill(COLOR_ORANGE);
 		this.graphics.drawRect(0, 0, platformLength, platformWidth);
 		this.graphics.endFill();
 	}
+	
+	
+	/* GETTERS & SETTERS */
 	
 	public function getPlatformSpeed():Int {
 		return this.platformSpeed;
@@ -39,6 +46,9 @@ class Platform extends Sprite
 	public function getPlatformWidth():Int {
 		return this.platformWidth;
 	}
+	
+	
+	/* PUBLIC METHODS */
 	
 	public function playPlatformSound():Void {
 		this.platformSound.play();

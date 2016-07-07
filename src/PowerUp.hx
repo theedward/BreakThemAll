@@ -9,8 +9,9 @@ import openfl.Assets;
 class PowerUp
 {
 
-	public static var BIGGERPADDLE:String = "BiggerPaddle";
-	public static var FASTERPADDLE:String = "FasterPaddle";
+	public static var BIGGER_PADDLE:String = "BiggerPaddle";
+	public static var FASTER_PADDLE:String = "FasterPaddle";
+	//Switch doesn't accept upper case stuff so I can't use these
 	
 	private var powerUpLength:Int = 20;
 	private var powerUpWidth:Int = 10;
@@ -38,6 +39,9 @@ class PowerUp
 		this.type = type;
 
 	}
+	
+	
+	/* GETTERS & SETTERS */
 	
 	public function getPowerUpSpeed():Int {
 		return this.powerUpSpeed;

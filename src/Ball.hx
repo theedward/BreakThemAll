@@ -4,6 +4,10 @@ import openfl.display.Sprite;
 
 class Ball extends Sprite
 {
+	//CONSTANTS
+	private var COLOR_WHITE:Int = 0xffffff;
+	
+	//VARIABLES
 	private var ballMovement:Point;
 	private var ballSpeed:Int;
 	private var ballRadius:Float = 5;
@@ -12,11 +16,13 @@ class Ball extends Sprite
 	{
 		super();
 
-		this.graphics.beginFill(0xffffff);
+		this.graphics.beginFill(COLOR_WHITE);
 		this.graphics.drawCircle(0, 0, ballRadius*2);
 		this.graphics.endFill();
 	}
 
+	/* GETTERS & SETTERS */
+	
 	public function getBallMovement():Point {
 		return this.ballMovement;
 	}
