@@ -24,7 +24,7 @@ class Level extends Sprite
 	
 	//Repeated from Main ..
 	private var NUM_REPEATS:Int = 100;
-	private var DEFAULT_GAME_SPEED:Int = 7;
+	private var DEFAULT_GAME_SPEED:Int = 5;
 	
 	//STRINGS
 	private var FILE_NOT_FOUND_STRING:String = "[ERROR]: File was not found!";
@@ -36,7 +36,7 @@ class Level extends Sprite
 	private var map:Array<Array<Int>>;
 	private var currentScore:Int = 0;
 	private var levelName:String;
-	private var powerUpSound:Sound = Assets.getMusic("audio/power_up.wav");
+	private var powerUpSound:Sound = Assets.getSound("audio/power_up.wav");
 	private var sound:Sound;
 	private var soundChannel:SoundChannel;
 	
@@ -62,6 +62,7 @@ class Level extends Sprite
 	}
 	
 	public function setSound(fileName:String) {
+	
 		var levelSound:Sound = Assets.getMusic("audio/levels/" + fileName + ".wav");
 		if (levelSound == null){
 			trace(FILE_NOT_FOUND_STRING);

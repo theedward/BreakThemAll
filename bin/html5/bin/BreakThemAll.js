@@ -79,7 +79,7 @@ ApplicationMain.init = function() {
 	if(total == 0) ApplicationMain.start();
 };
 ApplicationMain.main = function() {
-	ApplicationMain.config = { build : "62", company : "Joao Seixas", file : "BreakThemAll", fps : 60, name : "BreakThemAll", orientation : "", packageName : "BreakThemAll", version : "1.0.0", windows : [{ antialiasing : 0, background : 0, borderless : false, depthBuffer : false, display : 0, fullscreen : false, hardware : false, height : 500, parameters : "{}", resizable : true, stencilBuffer : true, title : "BreakThemAll", vsync : false, width : 500, x : null, y : null}]};
+	ApplicationMain.config = { build : "80", company : "Joao Seixas", file : "BreakThemAll", fps : 60, name : "BreakThemAll", orientation : "", packageName : "BreakThemAll", version : "1.0.0", windows : [{ antialiasing : 0, background : 0, borderless : false, depthBuffer : false, display : 0, fullscreen : false, hardware : false, height : 500, parameters : "{}", resizable : true, stencilBuffer : true, title : "BreakThemAll", vsync : false, width : 500, x : null, y : null}]};
 };
 ApplicationMain.start = function() {
 	var hasMain = false;
@@ -1437,7 +1437,7 @@ var Main = function() {
 	this.DEFAULT_LEFT_WALL_COORDINATES = new Coordinates(0,0);
 	this.DEFAULT_BALL_COORDINATES = new Coordinates(250,470);
 	this.DEFAULT_PLATFORM_COORDINATES = new Coordinates(200,480);
-	this.DEFAULT_GAME_SPEED = 7;
+	this.DEFAULT_GAME_SPEED = 5;
 	openfl_display_Sprite.call(this);
 	this.addEventListener("addedToStage",$bind(this,this.added));
 };
@@ -1902,8 +1902,18 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		_g.set_x(_g.get_x() + this.ball.getBallMovement().x);
 		var _g1 = this.ball;
 		_g1.set_y(_g1.get_y() + this.ball.getBallMovement().y);
-		if(this.ball.get_x() < this.BALL_BOUNCE_LEFT || this.ball.get_x() > this.BALL_BOUNCE_RIGHT) this.ball.setBallMovementXandY(this.ball.getBallMovement().x * -1,this.ball.getBallMovement().y);
-		if(this.ball.get_y() < this.BALL_BOUNCE_TOP) this.ball.setBallMovementXandY(this.ball.getBallMovement().x,this.ball.getBallMovement().y * -1);
+		if(this.ball.get_x() < this.BALL_BOUNCE_LEFT) {
+			this.ball.set_x(this.BALL_BOUNCE_LEFT);
+			this.ball.setBallMovementXandY(this.ball.getBallMovement().x * -1,this.ball.getBallMovement().y);
+		}
+		if(this.ball.get_x() > this.BALL_BOUNCE_RIGHT) {
+			this.ball.set_x(this.BALL_BOUNCE_RIGHT);
+			this.ball.setBallMovementXandY(this.ball.getBallMovement().x * -1,this.ball.getBallMovement().y);
+		}
+		if(this.ball.get_y() < this.BALL_BOUNCE_TOP) {
+			this.ball.set_y(this.BALL_BOUNCE_TOP);
+			this.ball.setBallMovementXandY(this.ball.getBallMovement().x,this.ball.getBallMovement().y * -1);
+		}
 		if(this.ball.get_y() > this.DROP_ZONE) this.setGameState(GameState.Lost);
 	}
 	,powerUpMovement: function() {
@@ -2412,12 +2422,12 @@ HxOverrides.iter = function(a) {
 	}};
 };
 var Level = function(fileName) {
-	this.powerUpSound = openfl_Assets.getMusic("audio/power_up.wav");
+	this.powerUpSound = openfl_Assets.getSound("audio/power_up.wav");
 	this.currentScore = 0;
 	this.powerUpList = [];
 	this.brickList = [];
 	this.FILE_NOT_FOUND_STRING = "[ERROR]: File was not found!";
-	this.DEFAULT_GAME_SPEED = 7;
+	this.DEFAULT_GAME_SPEED = 5;
 	this.NUM_REPEATS = 100;
 	this.POWER_UP_SCALE_DOWN = 0.25;
 	this.POWER_UP_TIMEOUT_MS = 5000;
@@ -2445,7 +2455,7 @@ Level.prototype = $extend(openfl_display_Sprite.prototype,{
 	}
 	,setSound: function(fileName) {
 		var levelSound = openfl_Assets.getMusic("audio/levels/" + fileName + ".wav");
-		if(levelSound == null) haxe_Log.trace(this.FILE_NOT_FOUND_STRING,{ fileName : "Level.hx", lineNumber : 67, className : "Level", methodName : "setSound"}); else this.sound = levelSound;
+		if(levelSound == null) haxe_Log.trace(this.FILE_NOT_FOUND_STRING,{ fileName : "Level.hx", lineNumber : 68, className : "Level", methodName : "setSound"}); else this.sound = levelSound;
 	}
 	,getSound: function() {
 		return this.sound;
@@ -2531,7 +2541,7 @@ Level.prototype = $extend(openfl_display_Sprite.prototype,{
 	,createLevel: function(levelFile) {
 		var map = [];
 		var input = openfl_Assets.getText("levels/" + levelFile + ".txt");
-		if(input == null) haxe_Log.trace(this.FILE_NOT_FOUND_STRING,{ fileName : "Level.hx", lineNumber : 204, className : "Level", methodName : "createLevel"}); else {
+		if(input == null) haxe_Log.trace(this.FILE_NOT_FOUND_STRING,{ fileName : "Level.hx", lineNumber : 205, className : "Level", methodName : "createLevel"}); else {
 			var rows = input.split("]");
 			var columnValues;
 			var _g1 = 0;
@@ -5032,7 +5042,6 @@ lime__$backend_html5_HTML5Renderer.prototype = {
 				this.parent.context = lime_graphics_RenderContext.CANVAS(this.parent.window.backend.canvas.getContext("2d"));
 				this.parent.type = lime_graphics_RendererType.CANVAS;
 			} else {
-				webgl = WebGLDebugUtils.makeDebugContext(webgl);
 				lime_graphics_opengl_GL.context = webgl;
 				this.parent.context = lime_graphics_RenderContext.OPENGL(lime_graphics_opengl_GL.context);
 				this.parent.type = lime_graphics_RendererType.OPENGL;
@@ -38182,5 +38191,3 @@ openfl_utils__$Endian_Endian_$Impl_$.BIG_ENDIAN = 0;
 openfl_utils__$Endian_Endian_$Impl_$.LITTLE_ENDIAN = 1;
 ApplicationMain.main();
 })(typeof console != "undefined" ? console : {log:function(){}}, typeof window != "undefined" ? window : exports, typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
-
-//# sourceMappingURL=BreakThemAll.js.map

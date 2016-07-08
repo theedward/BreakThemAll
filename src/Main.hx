@@ -39,7 +39,7 @@ class Main extends Sprite
 	var inited:Bool;
 	
 	//DEFAULT COORDINATE VALUES
-	private var DEFAULT_GAME_SPEED:Int = 7;
+	private var DEFAULT_GAME_SPEED:Int = 5;
 	private var DEFAULT_PLATFORM_COORDINATES:Coordinates = new Coordinates(200, 480);
 	private var DEFAULT_BALL_COORDINATES:Coordinates = new Coordinates(250, 470);
 	private var DEFAULT_LEFT_WALL_COORDINATES:Coordinates = new Coordinates(0, 0);
@@ -755,8 +755,27 @@ class Main extends Sprite
 	private function moveBall():Void {
 		ball.x += ball.getBallMovement().x;
 		ball.y += ball.getBallMovement().y;
-		if (ball.x < BALL_BOUNCE_LEFT || ball.x > BALL_BOUNCE_RIGHT) ball.setBallMovementXandY(ball.getBallMovement().x * -1, ball.getBallMovement().y); // Go to Oposite X direction, when touching a vertical wall
-		if (ball.y < BALL_BOUNCE_TOP) ball.setBallMovementXandY(ball.getBallMovement().x, ball.getBallMovement().y * -1); //Go to the Oposite Y direction when touching an horizontal wall
+		
+		if (ball.x < BALL_BOUNCE_LEFT) {
+			
+			ball.x = BALL_BOUNCE_LEFT;
+			// Go to Oposite X direction, when touching a vertical wall
+			ball.setBallMovementXandY(ball.getBallMovement().x * -1, ball.getBallMovement().y); 
+			
+		}
+		if ( ball.x > BALL_BOUNCE_RIGHT) {
+			
+			ball.x = BALL_BOUNCE_RIGHT;
+			ball.setBallMovementXandY(ball.getBallMovement().x * -1, ball.getBallMovement().y);
+		}
+		
+		//Go to the Oposite Y direction when touching an horizontal wall
+		if (ball.y < BALL_BOUNCE_TOP) {
+			
+			ball.y = BALL_BOUNCE_TOP;
+			ball.setBallMovementXandY(ball.getBallMovement().x, ball.getBallMovement().y * -1); 
+		}
+		
 		if (ball.y > DROP_ZONE) setGameState(Lost);
 	}
 	
